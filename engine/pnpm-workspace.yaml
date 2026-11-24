@@ -1,0 +1,7 @@
+# Its own workspace root, so installing here never touches Postiz's packages.
+packages:
+  - .
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - workerd

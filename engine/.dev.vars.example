@@ -1,0 +1,20 @@
+# Copy to .dev.vars for local work. In production set each one with `wrangler secret put NAME`.
+# Shared with the private app; it sends this as the Bearer token. 32+ random characters.
+POSTING_SECRET=
+# Encrypts the social tokens in the database. Changing it disconnects every channel. 32+ random characters.
+TOKEN_KEY=
+# Signs the public media links. 32+ random characters.
+MEDIA_SIGN_KEY=
+# The private app, e.g. https://superdoctor.in (locally http://localhost:3000). Sign-ins may only return here.
+APP_ORIGIN=
+# This engine's own public address, e.g. https://posting.superdoctor.in. Platforms fetch media from it.
+PUBLIC_URL=
+# One pair per platform; leave a pair empty to keep that platform switched off.
+INSTAGRAM_APP_ID=
+INSTAGRAM_APP_SECRET=
+FACEBOOK_APP_ID=
+FACEBOOK_APP_SECRET=
+YOUTUBE_CLIENT_ID=
+YOUTUBE_CLIENT_SECRET=
+LINKEDIN_CLIENT_ID=
+LINKEDIN_CLIENT_SECRET=

@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "superdoctor-posting",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "observability": { "enabled": true },
+  "triggers": { "crons": ["* * * * *"] },
+  // Ids are left out on purpose: the first `wrangler deploy` creates both and writes the ids here.
+  "d1_databases": [{ "binding": "DB", "migrations_dir": "migrations" }],
+  "kv_namespaces": [{ "binding": "MEDIA_KV" }]
+  // Once R2 is switched on, add this and deploy again. New media goes to R2, older media still reads from KV:
+  // ,"r2_buckets": [{ "binding": "MEDIA" }]
+}
