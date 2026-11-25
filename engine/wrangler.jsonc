@@ -4,6 +4,9 @@
   "main": "src/index.ts",
   "compatibility_date": "2026-11-01",
   "observability": { "enabled": true },
+  // Running your own copy: use your own address here.
+  "workers_dev": false,
+  "routes": [{ "pattern": "posting.superdoctor.in", "custom_domain": true }],
   "triggers": { "crons": ["* * * * *"] },
   // Our account's ids (not secret). Running your own copy: remove both ids and the first deploy creates new ones.
   "d1_databases": [{ "binding": "DB", "database_name": "superdoctor-posting-db", "database_id": "7331a9f1-a8cc-49e1-94ec-2eb7dd2488d0", "migrations_dir": "migrations" }],
