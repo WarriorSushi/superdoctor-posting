@@ -5,9 +5,9 @@
   "compatibility_date": "2026-11-01",
   "observability": { "enabled": true },
   "triggers": { "crons": ["* * * * *"] },
-  // Ids are left out on purpose: the first `wrangler deploy` creates both and writes the ids here.
-  "d1_databases": [{ "binding": "DB", "migrations_dir": "migrations" }],
-  "kv_namespaces": [{ "binding": "MEDIA_KV" }]
+  // Our account's ids (not secret). Running your own copy: remove both ids and the first deploy creates new ones.
+  "d1_databases": [{ "binding": "DB", "database_name": "superdoctor-posting-db", "database_id": "7331a9f1-a8cc-49e1-94ec-2eb7dd2488d0", "migrations_dir": "migrations" }],
+  "kv_namespaces": [{ "binding": "MEDIA_KV", "id": "211f925f5bb745e88c2c514cb3f9ce3f" }]
   // Once R2 is switched on, add this and deploy again. New media goes to R2, older media still reads from KV:
   // ,"r2_buckets": [{ "binding": "MEDIA" }]
 }
