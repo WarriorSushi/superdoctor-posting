@@ -1,4 +1,4 @@
-import { analytics, choose, complete, configured, connect, dailyRefresh, deleteChannel, listChannels } from './channels';
+import { analytics, choose, complete, configured, connect, dailyRefresh, deleteChannel, deleteOwner, listChannels } from './channels';
 import { sameSecret } from './crypto';
 import { HttpError, MINUTE, type Deps, type Env } from './env';
 import { cleanMedia, putMedia, serveMedia } from './media';
@@ -41,6 +41,8 @@ async function route(env: Env, deps: Deps, req: Request, url: URL): Promise<obje
       return listChannels(env, tenant(query.get('owner')));
     case 'DELETE channels/:id':
       return deleteChannel(env, deps, tenant(query.get('owner')), id!);
+    case 'DELETE owners/:id':
+      return deleteOwner(env, tenant(id));
     case 'PUT media':
       return putMedia(env, deps, tenant(query.get('owner')), req);
     case 'GET posts':

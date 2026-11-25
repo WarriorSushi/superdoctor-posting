@@ -134,6 +134,20 @@ export async function deleteChannel(env: Env, deps: Deps, owner: string, id: str
   return { ok: true };
 }
 
+/** Forgets everything held for one owner. Refused, with nothing changed, while a post is on its way out. Files go at the next sweeps. */
+export async function deleteOwner(env: Env, owner: string) {
+  const idle = "owner = ?1 AND NOT EXISTS (SELECT 1 FROM posts WHERE owner = ?1 AND state = 'publishing')";
+  await env.DB.batch([
+    `DELETE FROM channels WHERE ${idle}`,
+    `DELETE FROM flows WHERE ${idle}`,
+    `UPDATE media SET state = 'deleting' WHERE ${idle}`,
+    `DELETE FROM posts WHERE ${idle}`,
+  ].map((sql) => env.DB.prepare(sql).bind(owner)));
+  const busy = await env.DB.prepare("SELECT 1 FROM posts WHERE owner = ? AND state = 'publishing'").bind(owner).first();
+  if (busy) throw new HttpError(409, 'A post is going out right now. Try again in a few minutes.');
+  return { ok: true };
+}
+
 /** Gets a new token and saves it. A clear "no" marks the channel for reconnecting. */
 export async function refreshChannel(env: Env, deps: Deps, channel: Channel): Promise<string> {
   const p = platforms[channel.platform];

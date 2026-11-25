@@ -9,7 +9,7 @@ describe('access', () => {
   it('needs the secret on every /v1 route and hides everything else', async () => {
     const w = new World();
     for (const [method, path] of [['GET', 'health'], ['GET', `channels?owner=${A}`], ['POST', 'connect'], ['POST', 'complete'], ['POST', 'choose'],
-      ['DELETE', `channels/x?owner=${A}`], ['PUT', `media?owner=${A}`], ['POST', 'posts'], ['PATCH', 'posts/x'], ['DELETE', `posts/x?owner=${A}`],
+      ['DELETE', `channels/x?owner=${A}`], ['PUT', `media?owner=${A}`], ['POST', 'posts'], ['PATCH', 'posts/x'], ['DELETE', `posts/x?owner=${A}`], ['DELETE', `owners/${A}`],
       ['GET', `posts?owner=${A}&ids=x`], ['GET', `analytics/x?owner=${A}`]] as const) {
       for (const authorization of ['', 'Bearer ', 'Bearer wrong', 'Basic test-posting-secret']) {
         const res = await handle(env, w.deps, new Request(`https://posting.test/v1/${path}`, { method, headers: { authorization } }));
@@ -308,5 +308,28 @@ describe('analytics', () => {
     w.on('GET https://youtubeanalytics', new Response('{}', { status: 401 }));
     expect((await w.api('GET', `analytics/${id}?owner=${A}`)).status).toBe(409);
     expect((await w.api('GET', `channels?owner=${A}`)).body.channels[0].status).toBe('reconnect');
+  });
+});
+
+describe('forgetting an owner', () => {
+  it('removes everything of theirs, nothing of anyone else, and waits for a post on its way out', async () => {
+    const w = new World();
+    const count = async (owner: string) => Promise.all(['channels', 'posts', "media WHERE state != 'deleting' AND 1=1"].map(async (t) =>
+      (await env.DB.prepare(`SELECT COUNT(*) n FROM ${t}${t.includes('WHERE') ? ' AND' : ' WHERE'} owner = ?`).bind(owner).first<{ n: number }>())!.n));
+    for (const o of [A, B]) {
+      const channel = await w.channel(o, 'linkedin');
+      await w.post(o, channel, { ref: 'r', kind: 'images', media: [await w.media(o, 'image/jpeg')], at: '2026-12-25T10:00:00+05:30' });
+    }
+    await w.api('POST', 'connect', { owner: A, platform: 'linkedin', redirect_uri: CB('linkedin') });
+    await env.DB.prepare("UPDATE posts SET state = 'publishing' WHERE owner = ?").bind(A).run();
+    expect((await w.api('DELETE', `owners/${A}`)).status).toBe(409);
+    expect(await count(A)).toEqual([1, 1, 1]);
+    await env.DB.prepare("UPDATE posts SET state = 'queued' WHERE owner = ?").bind(A).run();
+    expect((await w.api('DELETE', `owners/${A}`)).body).toEqual({ ok: true });
+    expect(await count(A)).toEqual([0, 0, 0]);
+    expect(await env.DB.prepare('SELECT COUNT(*) n FROM flows WHERE owner = ?').bind(A).first('n')).toBe(0);
+    expect(await count(B)).toEqual([1, 1, 1]);
+    expect((await w.api('DELETE', `owners/${A}`)).status).toBe(200); // again is fine
+    expect((await w.api('DELETE', 'owners/nope')).status).toBe(400);
   });
 });

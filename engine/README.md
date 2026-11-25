@@ -61,6 +61,7 @@ Errors are `{error: "plain English"}`; 409s on a post also carry `{state}`.
 | `POST /v1/complete {owner, platform, state, code}` | `{channels}`, or for Facebook `{choose: {ticket, options: [{id, name, picture}]}}` |
 | `POST /v1/choose {owner, ticket, ids}` | `{channels}`; the ticket lives 15 minutes and works once |
 | `DELETE /v1/channels/:id?owner=` | `{ok}`; cancels queued posts, deletes tokens |
+| `DELETE /v1/owners/:owner` | `{ok}`; forgets channels, tokens, posts and files, 409 while a post is going out |
 | `PUT /v1/media?owner=` raw body | `{id, size}`; `image/jpeg`, `image/png` (8 MB), `video/mp4` (300 MB). **`Content-Length` is required.** |
 | `POST /v1/posts {owner, ref, channel, kind, text, title?, media, at}` | `{id, state}`; the same `(owner, ref)` returns the existing post before anything else is checked |
 | `PATCH /v1/posts/:id {owner, at}` | `{id, state}`, only while queued |
